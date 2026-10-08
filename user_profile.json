@@ -1,0 +1,33 @@
+{
+  "entity_meta": {
+    "rust_binding_target": "user_profile"
+  },
+  "identity": {
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "email": "jane@example.com",
+    "address": "12345 Drive Street",
+    "state": "Texas",
+    "city": "Dallas",
+    "zipCode": "71111",
+    "ssn": "123-45-6789"
+  },
+  "ui_actions": [
+    {
+      "action_id": "btn_edit_profile",
+      "label": "Edit Profile",
+      "type": "button",
+      "style": "primary",
+      "behavior": "refresh_page",
+      "onclick_handler": "window.location.reload();"
+    },
+    {
+      "action_id": "btn_delete_profile",
+      "label": "Delete Profile",
+      "type": "button",
+      "style": "danger",
+      "behavior": "disabled_noop",
+      "onclick_handler": "javascript:void(0);"
+    }
+  ]
+}
