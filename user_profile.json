@@ -28,6 +28,31 @@
       "style": "danger",
       "behavior": "disabled_noop",
       "onclick_handler": "javascript:void(0);"
+    },
+    {
+      "action_id": "chk_limit_personal_info",
+      "label": "Limit Use of My Sensitive Personal Information",
+      "type": "checkbox",
+      "style": "secondary",
+      "behavior": "disabled_noop",
+      "onclick_handler": "javascript:void(0);"
+    }
+  ],
+  "other_accounts": [
+    {
+      "action_id": "view_user_2",
+      "label": "View John Smith's Account",
+      "profile_url": "/user_profile?id=2",
+      "exposed_identity": {
+        "firstName": "John",
+        "lastName": "Smith",
+        "email": "john@example.com",
+        "address": "5439 Campbell Rd",
+        "state": "Texas",
+        "city": "Richardson",
+        "zipCode": "75080",
+        "ssn": "987-65-4321"
+      }
     }
   ]
 }
