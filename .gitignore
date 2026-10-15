@@ -1,5 +1,5 @@
-# for jetbrains suites
 .idea/
-
-
-# feel free to add.
+.venv/
+__pycache__/
+*.db
+.env
