@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from database import get_db
+from database import get_session
 from models import User
 from schemas import SignupRequest
 
@@ -10,7 +10,7 @@ router = APIRouter()
 # POST /signup
 # Check incoming request against SignupRequest in schemas.py
 @router.post("/signup")
-def signup(data: SignupRequest, db: Session = Depends(get_db)):
+def signup(data: SignupRequest, db: Session = Depends(get_session)):
     # Intentionally log the user's whole request
     print("New signup:", data)
 

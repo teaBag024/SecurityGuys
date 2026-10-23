@@ -1,16 +1,23 @@
 from fastapi import FastAPI
 
-import models
+#import models
 from database import Base, engine
 from routes import auth
-from models import User
-from database import SessionLocal
+from models import User, Appointment, Prescription
+from database import get_session
 from datetime import date
+from fastcrud import crud_router
 
+from schemas import SignupRequest, UpdateUser, ReadUser, CreateAppt, UpdateAppt, ReadAppt, CreatePrescription, UpdatePrescription, ReadPrescription
 
-Base.metadata.create_all(bind=engine)
+#Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+async def lifespan(app: FastAPI):
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+
+app = FastAPI(lifespan=lifespan)
 app.include_router(auth.router)
 
 @app.get("/health")
@@ -19,10 +26,42 @@ def health():
 
 # Users table CRUD endpoints
 
-# Create
-# Biometric hashing left out for now
-# Currently dates must be input as YYYY-MM-DD
+user_router = crud_router(
+    session = get_session,
+    model = User,
+    create_schema = SignupRequest,
+    update_schema = UpdateUser,
+    select_schema = ReadUser,
+    path="/users",
+    tags=["Users"]
+)
 
+appt_router = crud_router(
+    session = get_session,
+    model = Appointment,
+    create_schema = CreateAppt,
+    update_schema = UpdateAppt,
+    select_schema = ReadAppt,
+    path="/appointments",
+    tags=["Appointments"]
+)
+
+prescription_router = crud_router(
+    session = get_session,
+    model = Prescription,
+    create_schema = CreatePrescription,
+    update_schema = UpdatePrescription,
+    select_schema = ReadPrescription,
+    path="/prescriptions",
+    tags=["Prescriptions"]
+)
+
+app.include_router(user_router)
+app.include_router(appt_router)
+app.include_router(prescription_router)
+
+
+"""
 @app.post("/users")
 async def create_user(full_name: str, email: str,
                       password: str, ssn: str, date_of_birth: date,
@@ -76,4 +115,5 @@ async def delete_user(id: int):
     db.delete(db_user)
     db.commit()
     return {"message": "User removed successfully"}
+    """
     
