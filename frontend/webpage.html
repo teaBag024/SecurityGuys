@@ -32,6 +32,8 @@
         <h3>Your Profile Details:</h3>
         <div id="profile-card"></div>
         <div id="profile-actions" style="margin-top: 20px;"></div>
+        <div id="other-accounts" style="margin-top: 20px;"></div>
+        <div id="other-account-card"></div>
         <hr style="margin-top: 30px;">
         <button id="logout-btn" style="padding: 8px 16px;">Log Out</button>
     </div>
@@ -59,7 +61,10 @@
             { "name": "termsAccepted", "label": "I agree to the Terms of Service and Privacy Policy", "type": "checkbox", "required": true, "defaultValue": true },
             { "name": "subscribetoNewsletter", "label": "Subscribe to our newsletter!!", "type": "checkbox", "required": true, "defaultValue": true }
           ],
-          "profileIdentity": {
+          "entity_meta": {
+            "rust_binding_target": "user_profile"
+          },
+          "identity": {
             "firstName": "Jane",
             "lastName": "Doe",
             "email": "jane@example.com",
@@ -70,8 +75,47 @@
             "ssn": "123-45-6789"
           },
           "ui_actions": [
-            { "action_id": "btn_edit_profile", "label": "Edit Profile", "style": "primary", "onclick_handler": "window.location.reload();" },
-            { "action_id": "btn_delete_profile", "label": "Delete Profile", "style": "danger", "onclick_handler": "javascript:void(0);" }
+            {
+              "action_id": "btn_edit_profile",
+              "label": "Edit Profile",
+              "type": "button",
+              "style": "primary",
+              "behavior": "refresh_page",
+              "onclick_handler": "window.location.reload();"
+            },
+            {
+              "action_id": "btn_delete_profile",
+              "label": "Delete Profile",
+              "type": "button",
+              "style": "danger",
+              "behavior": "disabled_noop",
+              "onclick_handler": "javascript:void(0);"
+            },
+            {
+              "action_id": "chk_limit_personal_info",
+              "label": "Limit Use of My Sensitive Personal Information",
+              "type": "checkbox",
+              "style": "secondary",
+              "behavior": "disabled_noop",
+              "onclick_handler": "javascript:void(0);"
+            }
+          ],
+          "other_accounts": [
+            {
+              "action_id": "view_user_2",
+              "label": "View John Smith's Account",
+              "profile_url": "/user_profile?id=2",
+              "exposed_identity": {
+                "firstName": "John",
+                "lastName": "Smith",
+                "email": "john@example.com",
+                "address": "5439 Campbell Rd",
+                "state": "Texas",
+                "city": "Richardson",
+                "zipCode": "75080",
+                "ssn": "987-65-4321"
+              }
+            }
           ],
           "termsAndPrivacy": {
             "pageId": "terms_and_privacy_policy",
@@ -99,6 +143,8 @@
         
         const card = document.getElementById('profile-card');
         const actionsContainer = document.getElementById('profile-actions');
+        const otherAccountsContainer = document.getElementById('other-accounts');
+        const otherAccountCard = document.getElementById('other-account-card');
 
         function showScreen(screenToShow) {
             signupScreen.style.display = 'none';
@@ -143,14 +189,36 @@
         signupSubmitBtn.style.marginTop = "15px";
         signupForm.appendChild(signupSubmitBtn);
 
-        const identity = appData.profileIdentity;
-        for (const key in identity) {
-            const row = document.createElement('p');
-            row.innerHTML = "<strong>" + key + ":</strong> " + identity[key];
-            card.appendChild(row);
+        function renderIdentity(target, identity) {
+            target.innerHTML = '';
+            for (const key in identity) {
+                const row = document.createElement('p');
+                row.innerHTML = "<strong>" + key + ":</strong> " + identity[key];
+                target.appendChild(row);
+            }
         }
 
+        renderIdentity(card, appData.identity);
+
         appData.ui_actions.forEach(action => {
+            let el;
+            if (action.type === 'checkbox') {
+                el = document.createElement('input');
+                el.type = 'checkbox';
+                el.id = action.action_id;
+                el.style.marginRight = '6px';
+                const checkLabel = document.createElement('label');
+                checkLabel.htmlFor = action.action_id;
+                checkLabel.innerText = action.label;
+                el.setAttribute('onclick', action.onclick_handler);
+                const wrapper = document.createElement('div');
+                wrapper.style.marginTop = '15px';
+                wrapper.appendChild(el);
+                wrapper.appendChild(checkLabel);
+                actionsContainer.appendChild(wrapper);
+                return;
+            }
+
             const btn = document.createElement('button');
             btn.innerText = action.label;
             btn.id = action.action_id;
@@ -169,6 +237,18 @@
             btn.style.cursor = 'pointer';
             btn.setAttribute('onclick', action.onclick_handler);
             actionsContainer.appendChild(btn);
+        });
+
+        appData.other_accounts.forEach(account => {
+            const btn = document.createElement('button');
+            btn.innerText = account.label;
+            btn.id = account.action_id;
+            btn.style.padding = '8px 16px';
+            btn.style.marginRight = '10px';
+            btn.addEventListener('click', function() {
+                renderIdentity(otherAccountCard, account.exposed_identity);
+            });
+            otherAccountsContainer.appendChild(btn);
         });
 
                 const termsData = appData.termsAndPrivacy;
@@ -209,6 +289,7 @@
 
         logoutBtn.addEventListener('click', function() {
             navTabs.style.display = 'block';
+            otherAccountCard.innerHTML = '';
             showScreen(loginScreen);
         });
     </script>
