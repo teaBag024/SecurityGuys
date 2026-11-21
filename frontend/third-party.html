@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Demo Broker | Transfer Log</title>
+  <style>
+    body {
+      margin: 0;
+      background: #f5f7f6;
+      color: #182a26;
+      font: 1rem/1.55 system-ui, sans-serif;
+    }
+
+    header {
+      background: #173d34;
+      color: white;
+      padding: 1rem 1.25rem;
+    }
+
+    main {
+      max-width: 48rem;
+      margin: 0 auto;
+      padding: 2rem 1.25rem;
+    }
+
+    .notice {
+      display: inline-block;
+      background: #ddede5;
+      color: #215642;
+      padding: .3rem .7rem;
+      border-radius: .35rem;
+      font-weight: bold;
+    }
+
+    details {
+      background: white;
+      border: 1px solid #cfdad5;
+      border-radius: .75rem;
+      margin-bottom: .85rem;
+      padding: 1rem 1.2rem;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    dt { font-weight: bold; }
+    dd { margin: 0 0 .75rem; }
+  </style>
+</head>
+<body>
+  <header><strong>Demo Broker</strong></header>
+
+  <main>
+    <p class="notice">Class project · Synthetic data</p>
+    <h1>Third-party transfer log</h1>
+    <p>
+      These sample records show what a fictional data broker might receive
+      from the mock patient portal. Open a transfer to see which fields
+      were shared and whether consent was recorded.
+    </p>
+
+    <details open>
+      <summary>Transfer DEMO-001 · Consent unverified</summary>
+      <dl>
+        <dt>Source</dt>
+        <dd>Mock Patient Portal</dd>
+        <dt>Recipient</dt>
+        <dd>Demo Broker</dd>
+        <dt>Subject</dt>
+        <dd>Sample Adult A</dd>
+        <dt>Fields shared</dt>
+        <dd>Contact details and medical history</dd>
+        <dt>Simulated sale price</dt>
+        <dd>$1.25</dd>
+        <dt>Consent verified</dt>
+        <dd>No</dd>
+      </dl>
+    </details>
+
+    <details>
+      <summary>Transfer DEMO-002 · Parental consent unrecorded</summary>
+      <dl>
+        <dt>Source</dt>
+        <dd>Mock Patient Portal</dd>
+        <dt>Recipient</dt>
+        <dd>Demo Broker</dd>
+        <dt>Subject</dt>
+        <dd>Sample Minor B</dd>
+        <dt>Fields shared</dt>
+        <dd>Age group and medical history</dd>
+        <dt>Simulated sale price</dt>
+        <dd>$0.80</dd>
+        <dt>Parental consent</dt>
+        <dd>Unrecorded</dd>
+      </dl>
+    </details>
+  </main>
+</body>
+</html>
