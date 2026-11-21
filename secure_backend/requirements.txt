@@ -1,0 +1,7 @@
+-r ../backend/requirements.txt
+argon2-cffi==25.1.0
+argon2-cffi-bindings==26.2.0
+cffi==2.1.1
+cryptography==50.0.2
+pycparser==3.11
+PyJWT==2.15.1

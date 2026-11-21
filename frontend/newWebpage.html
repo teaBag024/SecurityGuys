@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Security Clinic</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #eef6f5;
+            --card: #ffffff;
+            --text: #2b3a42;
+            --muted: #6b7c85;
+            --primary: #3a9d9b;
+            --primary-dark: #2d807e;
+            --soft: #dcefee;
+            --danger: #c9605e;
+            --border: #d5e4e3;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 24px 16px 60px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Nunito', 'Segoe UI', Arial, sans-serif;
+            line-height: 1.55;
+        }
+        .wrap { max-width: 760px; margin: 0 auto; }
+        .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+        .brand-mark {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: var(--primary); color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; font-weight: 700;
+        }
+        .brand-name { font-size: 22px; font-weight: 700; color: var(--primary-dark); }
+        h2 { margin: 0 0 14px; font-size: 24px; color: var(--primary-dark); }
+        h3 { margin: 0 0 10px; font-size: 18px; }
+        h4 { margin: 18px 0 4px; color: var(--primary-dark); }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 18px rgba(58, 157, 155, 0.08);
+        }
+        .nav { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+        button {
+            font-family: inherit; font-size: 15px; font-weight: 600;
+            padding: 9px 18px; border-radius: 10px;
+            border: 1px solid var(--primary); background: #fff; color: var(--primary-dark);
+            cursor: pointer;
+        }
+        button:hover { background: var(--soft); }
+        button.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+        button.primary:hover { background: var(--primary-dark); }
+        button.danger { background: var(--danger); color: #fff; border-color: var(--danger); }
+        button.danger:hover { background: #b04f4d; }
+        button.tab.active { background: var(--primary); color: #fff; }
+        label { display: block; font-weight: 600; margin-bottom: 4px; }
+        input[type=text], input[type=email], input[type=password], input[type=date], select, textarea {
+            width: 100%; font-family: inherit; font-size: 15px; padding: 10px 12px;
+            border: 1px solid var(--border); border-radius: 10px; background: #fafdfd; color: var(--text);
+        }
+        input:focus, select:focus, textarea:focus { outline: 2px solid var(--soft); border-color: var(--primary); }
+        .field { margin-bottom: 14px; }
+        .check { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .check input { width: 18px; height: 18px; }
+        .check label { display: inline; margin: 0; font-weight: 400; }
+        .row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+        .item {
+            border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px;
+            margin-bottom: 12px; background: #fbfefe;
+        }
+        .item-title { font-weight: 700; font-size: 17px; }
+        .muted { color: var(--muted); font-size: 14px; }
+        .badge {
+            display: inline-block; background: var(--soft); color: var(--primary-dark);
+            border-radius: 999px; padding: 2px 10px; font-size: 13px; font-weight: 600; margin-left: 6px;
+        }
+        .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 18px; }
+        #notice { display: none; padding: 12px 16px; border-radius: 12px; margin-bottom: 16px; font-weight: 600; }
+        #notice.ok { display: block; background: #dff3e8; color: #226244; }
+        #notice.error { display: block; background: #fbe4e3; color: #8d3b39; }
+        .profile-line { margin: 6px 0; }
+        .terms-desc { font-style: italic; color: var(--muted); margin-bottom: 18px; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+
+    <div class="brand">
+        <div class="brand-mark">+</div>
+        <div class="brand-name">Security Clinic</div>
+    </div>
+
+    <div id="notice"></div>
+
+    <div id="navigation-tabs" class="nav">
+        <button id="tab-goto-signup">Go to Sign Up</button>
+        <button id="tab-goto-login">Go to Log In</button>
+        <button id="tab-goto-terms">Terms &amp; Privacy</button>
+    </div>
+
+    <div id="signup-screen" class="card">
+        <h2>Create Your Account</h2>
+        <form id="signup-form"></form>
+    </div>
+
+    <div id="login-screen" class="card" style="display: none;">
+        <h2>Log In</h2>
+        <form id="login-form">
+            <div class="field">
+                <label for="login-email">Email</label>
+                <input type="email" id="login-email" required>
+            </div>
+            <div class="field">
+                <label for="login-password">Password</label>
+                <input type="password" id="login-password" required>
+            </div>
+            <button type="submit" class="primary">Log In</button>
+        </form>
+    </div>
+
+    <div id="dashboard-screen" class="card" style="display: none;">
+        <h2 id="welcome-title">Welcome Back!</h2>
+
+        <div class="tabs">
+            <button class="tab active" id="tab-profile">My Profile</button>
+            <button class="tab" id="tab-prescriptions">Prescriptions</button>
+            <button class="tab" id="tab-appointments">Appointments</button>
+        </div>
+
+        <div id="panel-profile">
+            <h3>Your Profile Details</h3>
+            <div id="profile-card"></div>
+            <div id="profile-actions" class="row"></div>
+        </div>
+
+        <div id="panel-prescriptions" style="display: none;">
+            <h3>Your Prescriptions</h3>
+            <div id="prescription-list"></div>
+        </div>
+
+        <div id="panel-appointments" style="display: none;">
+            <h3>Book an Appointment</h3>
+            <form id="appointment-form">
+                <div class="field">
+                    <label for="appt-doctor">Doctor</label>
+                    <select id="appt-doctor" required></select>
+                </div>
+                <div class="field">
+                    <label for="appt-date">Date</label>
+                    <input type="date" id="appt-date" required>
+                </div>
+                <div class="field">
+                    <label for="appt-time">Time</label>
+                    <select id="appt-time" required></select>
+                </div>
+                <div class="field">
+                    <label for="appt-reason">Reason for visit (optional)</label>
+                    <textarea id="appt-reason" rows="2" maxlength="200"></textarea>
+                </div>
+                <button type="submit" class="primary">Book Appointment</button>
+            </form>
+            <h3 style="margin-top: 28px;">Your Appointments</h3>
+            <div id="appointment-list"></div>
+        </div>
+
+        <hr style="margin-top: 30px; border: none; border-top: 1px solid var(--border);">
+        <button id="logout-btn">Log Out</button>
+    </div>
+
+    <div id="edit-screen" class="card" style="display: none;">
+        <h2>Edit Profile</h2>
+        <form id="edit-form">
+            <div class="field">
+                <label for="edit-email">Email Address</label>
+                <input type="email" id="edit-email" required>
+            </div>
+            <div class="field">
+                <label for="edit-firstName">First Name</label>
+                <input type="text" id="edit-firstName" required>
+            </div>
+            <div class="field">
+                <label for="edit-lastName">Last Name</label>
+                <input type="text" id="edit-lastName" required>
+            </div>
+            <div class="check">
+                <input type="checkbox" id="edit-newsletter">
+                <label for="edit-newsletter">Subscribe to our newsletter</label>
+            </div>
+            <div class="row">
+                <button type="submit" class="primary">Save Changes</button>
+                <button type="button" id="edit-cancel-btn">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="terms-screen" class="card" style="display: none;">
+        <h2 id="terms-title"></h2>
+        <p id="terms-description" class="terms-desc"></p>
+        <div id="terms-sections"></div>
+        <div class="row">
+            <button id="terms-return-btn"></button>
+        </div>
+    </div>
+
+</div>
+
+<script type="application/json" id="app-data">
+{
+  "signupFields": [
+    { "name": "email", "label": "Email Address", "type": "email", "placeholder": "name@example.com", "required": true },
+    { "name": "firstName", "label": "First Name", "type": "text", "placeholder": "Enter your first name", "required": true },
+    { "name": "lastName", "label": "Last Name", "type": "text", "placeholder": "Enter your last name", "required": true },
+    { "name": "password", "label": "Password", "type": "password", "placeholder": "At least 8 characters", "required": true },
+    { "name": "termsAccepted", "label": "I agree to the Terms of Service and Privacy Policy", "type": "checkbox", "required": true, "defaultValue": false },
+    { "name": "subscribetoNewsletter", "label": "Subscribe to our newsletter (optional)", "type": "checkbox", "required": false, "defaultValue": false }
+  ],
+  "profileFields": [
+    { "key": "firstName", "label": "First name" },
+    { "key": "lastName", "label": "Last name" },
+    { "key": "email", "label": "Email" }
+  ],
+  "ui_actions": [
+    { "action_id": "btn_edit_profile", "label": "Edit Profile", "style": "primary", "action": "edit" },
+    { "action_id": "btn_delete_profile", "label": "Delete Profile", "style": "danger", "action": "delete" }
+  ],
+  "termsAndPrivacy": {
+    "pageId": "terms_and_privacy_policy",
+    "title": "Terms of Service and Privacy Policy",
+    "description": "When you use our services, you’re trusting us with your information. We appreciate your trust in us to do that carefully and sensibly. This Notice outlines how we collect and use the personal data of our users.",
+    "sections": [
+      { "name": "DataCollected", "heading": "What Data We Collect", "content": "We collect your email address, first name, last name, and a password to create your account. When you book an appointment we also store the doctor, date, time, and the reason for visit you enter. Your prescriptions are entered by clinic staff and shown to you after you log in. We will never ask for your home address or Social Security Number. Please keep in mind if any of these requests are made to ignore them and report the issue to support." },
+      { "name": "WhyWeNeedInfo", "heading": "Why We Need Your Info", "content": "We use your email and password strictly to verify your identity and sign you into your account, and your name to display your profile. Appointment and prescription records are used only to show them to you and to run the clinic schedule. We will not use your activity information to target ads or products. Our newsletter is optional and is only sent if you choose to subscribe." },
+      { "name": "ThirdPartySharing", "heading": "Sharing With Other Websites", "content": "Your information is safely stored and never shared with third-party sites. Your data is intended to stay within our database and not be sold for profit to outside companies." },
+      { "name": "LegalBasis", "heading": "Legal Basis for Processing", "content": "We process your email, name, and password because it is necessary to create and operate your account (GDPR Article 6(1)(b)). Appointment and prescription records are processed to provide you with health care (GDPR Article 9(2)(h)). We send our newsletter only with your consent (GDPR Article 6(1)(a)), which you can withdraw at any time by editing your profile." },
+      { "name": "DataRetention", "heading": "How Long We Keep Your Data", "content": "We keep your account, appointment, and prescription information only while your account is open. When you delete your account, all of it is removed immediately and we keep no copy." },
+      { "name": "AccountEditing", "heading": "Correcting Your Information", "content": "You can update your name, email address, and newsletter choice at any time from your profile page using the Edit Profile button. You can cancel any upcoming appointment from the Appointments tab." },
+      { "name": "AccountDeletion", "heading": "Deleting Your Account", "content": "As soon as you hit the delete button and confirm, we promise to have your account wiped from our database. All your personal information, appointments, and prescriptions will not be able to be retrieved anymore. It is permanently wiped and we are unable to reverse any changes." }
+    ],
+    "ReturnButton": { "text": "Return to Sign Up", "target": "signup-screen" }
+  }
+}
+</script>
+
+<script>
+    const appData = JSON.parse(document.getElementById('app-data').textContent);
+
+    let token = null;
+    let profile = null;
+    let doctors = [];
+
+    try { token = sessionStorage.getItem('token'); } catch (e) {}
+
+    function setToken(value) {
+        token = value;
+        try {
+            if (value) sessionStorage.setItem('token', value);
+            else sessionStorage.removeItem('token');
+        } catch (e) {}
+    }
+
+    async function api(method, url, body) {
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = 'Bearer ' + token;
+        const res = await fetch(url, { method: method, headers: headers, body: body ? JSON.stringify(body) : undefined });
+        let data = {};
+        try { data = await res.json(); } catch (e) {}
+        if (!res.ok) {
+            const err = new Error(data.error || 'Something went wrong.');
+            err.status = res.status;
+            throw err;
+        }
+        return data;
+    }
+
+    const notice = document.getElementById('notice');
+    const navTabs = document.getElementById('navigation-tabs');
+    const signupScreen = document.getElementById('signup-screen');
+    const loginScreen = document.getElementById('login-screen');
+    const dashboardScreen = document.getElementById('dashboard-screen');
+    const editScreen = document.getElementById('edit-screen');
+    const termsScreen = document.getElementById('terms-screen');
+
+    const signupForm = document.getElementById('signup-form');
+    const loginForm = document.getElementById('login-form');
+    const editForm = document.getElementById('edit-form');
+    const appointmentForm = document.getElementById('appointment-form');
+
+    const card = document.getElementById('profile-card');
+    const actionsContainer = document.getElementById('profile-actions');
+    const prescriptionList = document.getElementById('prescription-list');
+    const appointmentList = document.getElementById('appointment-list');
+
+    const doctorSelect = document.getElementById('appt-doctor');
+    const dateInput = document.getElementById('appt-date');
+    const timeSelect = document.getElementById('appt-time');
+
+    function showNotice(message, isError) {
+        notice.textContent = message;
+        notice.className = isError ? 'error' : 'ok';
+    }
+
+    function clearNotice() {
+        notice.textContent = '';
+        notice.className = '';
+    }
+
+    function showScreen(screenToShow) {
+        [signupScreen, loginScreen, dashboardScreen, editScreen, termsScreen].forEach(s => { s.style.display = 'none'; });
+        screenToShow.style.display = 'block';
+        navTabs.style.display = screenToShow === dashboardScreen || screenToShow === editScreen ? 'none' : 'flex';
+    }
+
+    function todayString() {
+        const d = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+    }
+
+    function formatDate(dateStr) {
+        return new Date(dateStr + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    function formatTime(timeStr) {
+        return new Date('2000-01-01T' + timeStr + ':00').toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+    }
+
+    function makeEl(tag, className, text) {
+        const el = document.createElement(tag);
+        if (className) el.className = className;
+        if (text !== undefined) el.textContent = text;
+        return el;
+    }
+
+    function logoutLocally() {
+        setToken(null);
+        profile = null;
+        card.innerHTML = '';
+        prescriptionList.innerHTML = '';
+        appointmentList.innerHTML = '';
+        showScreen(loginScreen);
+    }
+
+    function handleError(err) {
+        if (err.status === 401 && token) {
+            logoutLocally();
+            showNotice('Your session has ended. Please log in again.', true);
+            return;
+        }
+        showNotice(err.message, true);
+    }
+
+    function renderProfile() {
+        card.innerHTML = '';
+        document.getElementById('welcome-title').textContent = 'Welcome Back, ' + profile.firstName + '!';
+        appData.profileFields.forEach(field => {
+            const row = makeEl('p', 'profile-line');
+            row.appendChild(makeEl('strong', '', field.label + ': '));
+            row.appendChild(document.createTextNode(profile[field.key]));
+            card.appendChild(row);
+        });
+    }
+
+    function showPanel(name) {
+        ['profile', 'prescriptions', 'appointments'].forEach(p => {
+            document.getElementById('panel-' + p).style.display = p === name ? 'block' : 'none';
+            document.getElementById('tab-' + p).classList.toggle('active', p === name);
+        });
+        clearNotice();
+        if (name === 'prescriptions') loadPrescriptions();
+        if (name === 'appointments') loadAppointments();
+    }
+
+    async function loadPrescriptions() {
+        try {
+            const list = await api('GET', '/api/prescriptions');
+            prescriptionList.innerHTML = '';
+            if (!list.length) {
+                prescriptionList.appendChild(makeEl('p', 'muted', 'No prescriptions on file.'));
+                return;
+            }
+            list.forEach(rx => {
+                const item = makeEl('div', 'item');
+                const title = makeEl('div', 'item-title', rx.medication + ' ' + rx.dosage);
+                title.appendChild(makeEl('span', 'badge', rx.refillsRemaining + ' refills left'));
+                item.appendChild(title);
+                item.appendChild(makeEl('div', '', rx.instructions));
+                item.appendChild(makeEl('div', 'muted', 'Prescribed by ' + rx.prescribedBy + ' on ' + formatDate(rx.prescribedOn)));
+                prescriptionList.appendChild(item);
+            });
+        } catch (err) {
+            handleError(err);
+        }
+    }
+
+    async function loadAppointments() {
+        try {
+            const list = await api('GET', '/api/appointments');
+            appointmentList.innerHTML = '';
+            if (!list.length) {
+                appointmentList.appendChild(makeEl('p', 'muted', 'No upcoming appointments.'));
+                return;
+            }
+            list.forEach(appt => {
+                const item = makeEl('div', 'item');
+                item.appendChild(makeEl('div', 'item-title', appt.doctor));
+                item.appendChild(makeEl('div', '', formatDate(appt.date) + ' at ' + formatTime(appt.time)));
+                if (appt.reason) item.appendChild(makeEl('div', 'muted', 'Reason: ' + appt.reason));
+                const cancel = makeEl('button', 'danger', 'Cancel Appointment');
+                cancel.style.marginTop = '10px';
+                cancel.addEventListener('click', async function() {
+                    if (!confirm('Cancel this appointment?')) return;
+                    try {
+                        await api('DELETE', '/api/appointments/' + appt.id);
+                        showNotice('Appointment cancelled.', false);
+                        loadAppointments();
+                        refreshSlots();
+                    } catch (err) {
+                        handleError(err);
+                    }
+                });
+                item.appendChild(cancel);
+                appointmentList.appendChild(item);
+            });
+        } catch (err) {
+            handleError(err);
+        }
+    }
+
+    async function loadDoctors() {
+        try {
+            doctors = await api('GET', '/api/doctors');
+            doctorSelect.innerHTML = '';
+            const placeholder = makeEl('option', '', 'Select a doctor');
+            placeholder.value = '';
+            doctorSelect.appendChild(placeholder);
+            doctors.forEach(d => {
+                const opt = makeEl('option', '', d.name + ' (' + d.specialty + ')');
+                opt.value = d.id;
+                doctorSelect.appendChild(opt);
+            });
+        } catch (err) {
+            handleError(err);
+        }
+    }
+
+    async function refreshSlots() {
+        timeSelect.innerHTML = '';
+        const empty = makeEl('option', '', 'Select a doctor and date first');
+        empty.value = '';
+        if (!doctorSelect.value || !dateInput.value) {
+            timeSelect.appendChild(empty);
+            return;
+        }
+        try {
+            const slots = await api('GET', '/api/doctors/' + doctorSelect.value + '/slots?date=' + encodeURIComponent(dateInput.value));
+            timeSelect.innerHTML = '';
+            if (!slots.length) {
+                const none = makeEl('option', '', 'No openings on this day');
+                none.value = '';
+                timeSelect.appendChild(none);
+                return;
+            }
+            slots.forEach(s => {
+                const opt = makeEl('option', '', formatTime(s));
+                opt.value = s;
+                timeSelect.appendChild(opt);
+            });
+        } catch (err) {
+            timeSelect.appendChild(empty);
+            handleError(err);
+        }
+    }
+
+    async function openDashboard() {
+        profile = await api('GET', '/api/me');
+        renderProfile();
+        await loadDoctors();
+        dateInput.min = todayString();
+        refreshSlots();
+        showScreen(dashboardScreen);
+        showPanel('profile');
+    }
+
+    document.getElementById('tab-goto-signup').addEventListener('click', function() { clearNotice(); showScreen(signupScreen); });
+    document.getElementById('tab-goto-login').addEventListener('click', function() { clearNotice(); showScreen(loginScreen); });
+    document.getElementById('tab-goto-terms').addEventListener('click', function() { clearNotice(); showScreen(termsScreen); });
+
+    document.getElementById('tab-profile').addEventListener('click', function() { showPanel('profile'); });
+    document.getElementById('tab-prescriptions').addEventListener('click', function() { showPanel('prescriptions'); });
+    document.getElementById('tab-appointments').addEventListener('click', function() { showPanel('appointments'); });
+
+    appData.signupFields.forEach(field => {
+        const container = document.createElement('div');
+        container.className = field.type === 'checkbox' ? 'check' : 'field';
+
+        const input = document.createElement('input');
+        input.type = field.type;
+        input.name = field.name;
+        input.id = 'signup-' + field.name;
+        if (field.placeholder) input.placeholder = field.placeholder;
+        if (field.required) input.required = true;
+        if (field.type === 'checkbox' && field.defaultValue) input.checked = true;
+
+        const label = document.createElement('label');
+        label.htmlFor = input.id;
+        label.textContent = field.label;
+
+        if (field.type === 'checkbox') {
+            container.appendChild(input);
+            container.appendChild(label);
+        } else {
+            container.appendChild(label);
+            container.appendChild(input);
+        }
+        signupForm.appendChild(container);
+    });
+
+    const signupSubmitBtn = document.createElement('button');
+    signupSubmitBtn.type = 'submit';
+    signupSubmitBtn.className = 'primary';
+    signupSubmitBtn.textContent = 'Sign Up';
+    signupForm.appendChild(signupSubmitBtn);
+
+    const actionHandlers = {
+        edit: function() {
+            document.getElementById('edit-email').value = profile.email;
+            document.getElementById('edit-firstName').value = profile.firstName;
+            document.getElementById('edit-lastName').value = profile.lastName;
+            document.getElementById('edit-newsletter').checked = profile.subscribetoNewsletter;
+            clearNotice();
+            showScreen(editScreen);
+        },
+        delete: async function() {
+            if (!confirm('Permanently delete your account, appointments, and prescriptions? This cannot be undone.')) return;
+            try {
+                await api('DELETE', '/api/me');
+                logoutLocally();
+                showScreen(signupScreen);
+                showNotice('Your account and personal data have been deleted.', false);
+            } catch (err) {
+                handleError(err);
+            }
+        }
+    };
+
+    appData.ui_actions.forEach(action => {
+        const btn = document.createElement('button');
+        btn.textContent = action.label;
+        btn.id = action.action_id;
+        btn.className = action.style;
+        btn.addEventListener('click', actionHandlers[action.action]);
+        actionsContainer.appendChild(btn);
+    });
+
+    const termsData = appData.termsAndPrivacy;
+    document.getElementById('terms-title').textContent = termsData.title;
+    document.getElementById('terms-description').textContent = termsData.description;
+
+    const termsSectionsContainer = document.getElementById('terms-sections');
+    termsData.sections.forEach(sec => {
+        termsSectionsContainer.appendChild(makeEl('h4', '', sec.heading));
+        termsSectionsContainer.appendChild(makeEl('p', '', sec.content));
+    });
+
+    const termsReturnBtn = document.getElementById('terms-return-btn');
+    termsReturnBtn.textContent = termsData.ReturnButton.text;
+    termsReturnBtn.addEventListener('click', function() {
+        showScreen(signupScreen);
+    });
+
+    signupForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const els = signupForm.elements;
+        try {
+            await api('POST', '/api/signup', {
+                email: els.email.value,
+                firstName: els.firstName.value,
+                lastName: els.lastName.value,
+                password: els.password.value,
+                termsAccepted: els.termsAccepted.checked,
+                subscribetoNewsletter: els.subscribetoNewsletter.checked
+            });
+            signupForm.reset();
+            showScreen(loginScreen);
+            showNotice('Account registered successfully! Now please log in.', false);
+        } catch (err) {
+            handleError(err);
+        }
+    });
+
+    loginForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        try {
+            const result = await api('POST', '/api/login', {
+                email: document.getElementById('login-email').value,
+                password: document.getElementById('login-password').value
+            });
+            setToken(result.token);
+            loginForm.reset();
+            clearNotice();
+            await openDashboard();
+        } catch (err) {
+            handleError(err);
+        }
+    });
+
+    editForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        try {
+            profile = await api('PUT', '/api/me', {
+                email: document.getElementById('edit-email').value,
+                firstName: document.getElementById('edit-firstName').value,
+                lastName: document.getElementById('edit-lastName').value,
+                subscribetoNewsletter: document.getElementById('edit-newsletter').checked
+            });
+            renderProfile();
+            showScreen(dashboardScreen);
+            showPanel('profile');
+            showNotice('Profile updated.', false);
+        } catch (err) {
+            handleError(err);
+        }
+    });
+
+    document.getElementById('edit-cancel-btn').addEventListener('click', function() {
+        showScreen(dashboardScreen);
+    });
+
+    doctorSelect.addEventListener('change', refreshSlots);
+    dateInput.addEventListener('change', refreshSlots);
+
+    appointmentForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        try {
+            await api('POST', '/api/appointments', {
+                doctorId: doctorSelect.value,
+                date: dateInput.value,
+                time: timeSelect.value,
+                reason: document.getElementById('appt-reason').value
+            });
+            appointmentForm.reset();
+            showNotice('Your appointment is booked.', false);
+            refreshSlots();
+            loadAppointments();
+        } catch (err) {
+            handleError(err);
+            refreshSlots();
+        }
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', async function() {
+        try { await api('POST', '/api/logout'); } catch (err) {}
+        logoutLocally();
+    });
+
+    showScreen(signupScreen);
+    if (token) {
+        openDashboard().catch(function() { logoutLocally(); clearNotice(); showScreen(signupScreen); });
+    }
+</script>
+
+</body>
+</html>
