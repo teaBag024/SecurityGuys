@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Security Clinic</title>
+    <title>Security Clinic (Demo)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -86,6 +86,9 @@
         #notice.error { display: block; background: #fbe4e3; color: #8d3b39; }
         .profile-line { margin: 6px 0; }
         .terms-desc { font-style: italic; color: var(--muted); margin-bottom: 18px; }
+        .footer { margin-top: 22px; text-align: center; }
+        .footer button { border: none; background: none; padding: 0; font-weight: 400; text-decoration: underline; color: var(--muted); }
+        .footer button:hover { background: none; color: var(--primary-dark); }
     </style>
 </head>
 <body>
@@ -97,6 +100,7 @@
     </div>
 
     <div id="notice"></div>
+    <div class="muted" style="margin-bottom:14px;">Demo: log in with jane@example.com / DemoPass123!</div>
 
     <div id="navigation-tabs" class="nav">
         <button id="tab-goto-signup">Go to Sign Up</button>
@@ -131,6 +135,7 @@
             <button class="tab active" id="tab-profile">My Profile</button>
             <button class="tab" id="tab-prescriptions">Prescriptions</button>
             <button class="tab" id="tab-appointments">Appointments</button>
+            <button class="tab" id="tab-privacy">Privacy Choices</button>
         </div>
 
         <div id="panel-profile">
@@ -167,6 +172,21 @@
             </form>
             <h3 style="margin-top: 28px;">Your Appointments</h3>
             <div id="appointment-list"></div>
+        </div>
+
+        <div id="panel-privacy" style="display: none;">
+            <h3>Your Privacy Choices</h3>
+            <p class="muted">California residents can opt out of the sale or sharing of personal information and limit the use of sensitive personal information. We offer these choices to every user.</p>
+            <p id="gpc-note" class="muted" style="display: none;"></p>
+            <div class="check">
+                <input type="checkbox" id="opt-out-sale">
+                <label for="opt-out-sale">Do Not Sell or Share My Personal Information</label>
+            </div>
+            <div class="check">
+                <input type="checkbox" id="limit-sensitive">
+                <label for="limit-sensitive">Limit the Use of My Sensitive Personal Information</label>
+            </div>
+            <p class="muted">Sensitive personal information we hold: your account password, your prescriptions, and the reason you give for an appointment. While the limit is on, we do not save the reason for visit on new appointments.</p>
         </div>
 
         <hr style="margin-top: 30px; border: none; border-top: 1px solid var(--border);">
@@ -208,6 +228,8 @@
         </div>
     </div>
 
+    <div class="footer"><button id="privacy-choices-link">Your California Privacy Choices</button></div>
+
 </div>
 
 <script type="application/json" id="app-data">
@@ -237,6 +259,8 @@
       { "name": "DataCollected", "heading": "What Data We Collect", "content": "We collect your email address, first name, last name, and a password to create your account. When you book an appointment we also store the doctor, date, time, and the reason for visit you enter. Your prescriptions are entered by clinic staff and shown to you after you log in. We will never ask for your home address or Social Security Number. Please keep in mind if any of these requests are made to ignore them and report the issue to support." },
       { "name": "WhyWeNeedInfo", "heading": "Why We Need Your Info", "content": "We use your email and password strictly to verify your identity and sign you into your account, and your name to display your profile. Appointment and prescription records are used only to show them to you and to run the clinic schedule. We will not use your activity information to target ads or products. Our newsletter is optional and is only sent if you choose to subscribe." },
       { "name": "ThirdPartySharing", "heading": "Sharing With Other Websites", "content": "Your information is safely stored and never shared with third-party sites. Your data is intended to stay within our database and not be sold for profit to outside companies." },
+      { "name": "CaliforniaPrivacyRights", "heading": "California Privacy Rights", "content": "We do not sell your personal information and we do not share it for cross-context behavioral advertising, and we have not done either in the past 12 months. Every user, including California residents, can turn on 'Do Not Sell or Share My Personal Information' under Privacy Choices after logging in, and we will honor that choice if our practices ever change. We also treat a Global Privacy Control signal from your browser as that opt-out. We will not treat you differently for using these choices. You can reach them from the 'Your California Privacy Choices' link at the bottom of every page." },
+      { "name": "SensitiveInformation", "heading": "Sensitive Personal Information", "content": "Some of the information we hold is sensitive personal information under California law: your account password, your prescriptions (health information), and the reason you give for an appointment (health information). We use it only to run your account, show you your records, and schedule your care. We never use it to infer characteristics about you or for advertising. You can turn on 'Limit the Use of My Sensitive Personal Information' under Privacy Choices. While it is on, we do not save the reason for visit on new appointments. Reasons already saved stay on those appointments until you cancel them or delete your account." },
       { "name": "LegalBasis", "heading": "Legal Basis for Processing", "content": "We process your email, name, and password because it is necessary to create and operate your account (GDPR Article 6(1)(b)). Appointment and prescription records are processed to provide you with health care (GDPR Article 9(2)(h)). We send our newsletter only with your consent (GDPR Article 6(1)(a)), which you can withdraw at any time by editing your profile." },
       { "name": "DataRetention", "heading": "How Long We Keep Your Data", "content": "We keep your account, appointment, and prescription information only while your account is open. When you delete your account, all of it is removed immediately and we keep no copy." },
       { "name": "AccountEditing", "heading": "Correcting Your Information", "content": "You can update your name, email address, and newsletter choice at any time from your profile page using the Edit Profile button. You can cancel any upcoming appointment from the Appointments tab." },
@@ -264,18 +288,141 @@
         } catch (e) {}
     }
 
+    const SLOTS = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00'];
+    const demoDb = {
+        nextId: 100,
+        doctors: [
+            { id: 1, name: 'Dr. Maya Patel', specialty: 'Family Medicine' },
+            { id: 2, name: 'Dr. Daniel Okafor', specialty: 'Internal Medicine' },
+            { id: 3, name: 'Dr. Lena Brooks', specialty: 'Dermatology' }
+        ],
+        users: [{ id: 1, email: 'jane@example.com', firstName: 'Jane', lastName: 'Doe', password: 'DemoPass123!', subscribetoNewsletter: false, doNotSellOrShare: false, limitSensitiveUse: false }],
+        prescriptions: [
+            { id: 1, userId: 1, medication: 'Lisinopril', dosage: '10 mg', instructions: 'One tablet by mouth once daily in the morning.', refillsRemaining: 2, doctorId: 2, prescribedOn: '2026-09-14' },
+            { id: 2, userId: 1, medication: 'Atorvastatin', dosage: '20 mg', instructions: 'One tablet by mouth at bedtime.', refillsRemaining: 5, doctorId: 2, prescribedOn: '2026-09-14' },
+            { id: 3, userId: 1, medication: 'Cetirizine', dosage: '10 mg', instructions: 'One tablet daily as needed for allergy symptoms.', refillsRemaining: 0, doctorId: 1, prescribedOn: '2026-10-02' }
+        ],
+        appointments: []
+    };
+    const demoSessions = {};
+
+    function fail(status, message) {
+        const err = new Error(message);
+        err.status = status;
+        return err;
+    }
+
+    function demoDoctorName(id) {
+        const d = demoDb.doctors.find(x => x.id === id);
+        return d ? d.name : 'Unknown';
+    }
+
+    function demoProfile(u) {
+        return { firstName: u.firstName, lastName: u.lastName, email: u.email, subscribetoNewsletter: u.subscribetoNewsletter, doNotSellOrShare: u.doNotSellOrShare === true, limitSensitiveUse: u.limitSensitiveUse === true };
+    }
+
+    function demoTaken(doctorId, date) {
+        return demoDb.appointments.filter(a => a.doctorId === doctorId && a.date === date).map(a => a.time);
+    }
+
     async function api(method, url, body) {
-        const headers = { 'Content-Type': 'application/json' };
-        if (token) headers['Authorization'] = 'Bearer ' + token;
-        const res = await fetch(url, { method: method, headers: headers, body: body ? JSON.stringify(body) : undefined });
-        let data = {};
-        try { data = await res.json(); } catch (e) {}
-        if (!res.ok) {
-            const err = new Error(data.error || 'Something went wrong.');
-            err.status = res.status;
-            throw err;
+        body = body || {};
+        const path = url.split('?')[0];
+        const query = new URLSearchParams(url.split('?')[1] || '');
+
+        if (method === 'POST' && path === '/api/signup') {
+            const email = String(body.email || '').trim().toLowerCase();
+            if (!email || !body.firstName || !body.lastName) throw fail(400, 'Please enter a valid email and your full name.');
+            if (String(body.password || '').length < 8) throw fail(400, 'Password must be at least 8 characters.');
+            if (body.termsAccepted !== true) throw fail(400, 'Please accept the Terms of Service and Privacy Policy.');
+            if (demoDb.users.some(u => u.email === email)) throw fail(409, 'An account with this email already exists.');
+            demoDb.users.push({ id: demoDb.nextId++, email: email, firstName: body.firstName.trim(), lastName: body.lastName.trim(), password: body.password, subscribetoNewsletter: body.subscribetoNewsletter === true, doNotSellOrShare: navigator.globalPrivacyControl === true, limitSensitiveUse: false });
+            return { message: 'Account created.' };
         }
-        return data;
+
+        if (method === 'POST' && path === '/api/login') {
+            const email = String(body.email || '').trim().toLowerCase();
+            const user = demoDb.users.find(u => u.email === email);
+            if (!user || user.password !== body.password) throw fail(401, 'Invalid email or password.');
+            if (navigator.globalPrivacyControl === true) user.doNotSellOrShare = true;
+            const t = 'demo-' + Math.random().toString(36).slice(2);
+            demoSessions[t] = user.id;
+            return { token: t };
+        }
+
+        if (method === 'GET' && path === '/api/doctors') return demoDb.doctors;
+
+        const user = demoDb.users.find(u => u.id === demoSessions[token]);
+        if (!user) throw fail(401, 'Please log in.');
+
+        if (method === 'POST' && path === '/api/logout') { delete demoSessions[token]; return {}; }
+        if (method === 'GET' && path === '/api/me') return demoProfile(user);
+
+        if (method === 'PUT' && path === '/api/me') {
+            const email = String(body.email || '').trim().toLowerCase();
+            if (demoDb.users.some(u => u.email === email && u.id !== user.id)) throw fail(409, 'That email is already in use.');
+            user.email = email;
+            user.firstName = body.firstName.trim();
+            user.lastName = body.lastName.trim();
+            user.subscribetoNewsletter = body.subscribetoNewsletter === true;
+            return demoProfile(user);
+        }
+
+        if (method === 'DELETE' && path === '/api/me') {
+            demoDb.users = demoDb.users.filter(u => u.id !== user.id);
+            demoDb.prescriptions = demoDb.prescriptions.filter(p => p.userId !== user.id);
+            demoDb.appointments = demoDb.appointments.filter(a => a.userId !== user.id);
+            delete demoSessions[token];
+            return {};
+        }
+
+        if (method === 'PUT' && path === '/api/me/privacy') {
+            user.doNotSellOrShare = body.doNotSellOrShare === true;
+            user.limitSensitiveUse = body.limitSensitiveUse === true;
+            return demoProfile(user);
+        }
+
+        if (method === 'GET' && path === '/api/prescriptions') {
+            return demoDb.prescriptions.filter(p => p.userId === user.id).map(p => ({
+                id: p.id, medication: p.medication, dosage: p.dosage, instructions: p.instructions,
+                refillsRemaining: p.refillsRemaining, prescribedBy: demoDoctorName(p.doctorId), prescribedOn: p.prescribedOn
+            }));
+        }
+
+        const slotMatch = path.match(/^\/api\/doctors\/(\d+)\/slots$/);
+        if (method === 'GET' && slotMatch) {
+            const date = query.get('date') || '';
+            if (date < todayString()) throw fail(400, 'Choose a date that is today or later.');
+            const taken = demoTaken(Number(slotMatch[1]), date);
+            return SLOTS.filter(s => !taken.includes(s));
+        }
+
+        if (method === 'GET' && path === '/api/appointments') {
+            return demoDb.appointments.filter(a => a.userId === user.id)
+                .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))
+                .map(a => ({ id: a.id, doctor: demoDoctorName(a.doctorId), date: a.date, time: a.time, reason: a.reason }));
+        }
+
+        if (method === 'POST' && path === '/api/appointments') {
+            const doctorId = Number(body.doctorId);
+            if (!demoDb.doctors.some(d => d.id === doctorId)) throw fail(400, 'Please choose a doctor.');
+            if (!body.date || body.date < todayString()) throw fail(400, 'Please choose a date that is today or later.');
+            if (!SLOTS.includes(body.time)) throw fail(400, 'Please choose an available time.');
+            if (demoTaken(doctorId, body.date).includes(body.time)) throw fail(409, 'That time was just taken. Please pick another.');
+            const a = { id: demoDb.nextId++, userId: user.id, doctorId: doctorId, date: body.date, time: body.time, reason: user.limitSensitiveUse === true ? '' : String(body.reason || '').slice(0, 200) };
+            demoDb.appointments.push(a);
+            return a;
+        }
+
+        const cancelMatch = path.match(/^\/api\/appointments\/(\d+)$/);
+        if (method === 'DELETE' && cancelMatch) {
+            const i = demoDb.appointments.findIndex(a => a.id === Number(cancelMatch[1]) && a.userId === user.id);
+            if (i === -1) throw fail(404, 'Appointment not found.');
+            demoDb.appointments.splice(i, 1);
+            return {};
+        }
+
+        throw fail(404, 'Not found.');
     }
 
     const notice = document.getElementById('notice');
@@ -364,16 +511,51 @@
             row.appendChild(document.createTextNode(profile[field.key]));
             card.appendChild(row);
         });
+        applyLimitToForm();
+    }
+
+    function applyLimitToForm() {
+        const reason = document.getElementById('appt-reason');
+        const limited = !!profile && profile.limitSensitiveUse === true;
+        reason.disabled = limited;
+        if (limited) reason.value = '';
+        reason.placeholder = limited ? 'Not collected while use of sensitive information is limited' : '';
+    }
+
+    function renderPrivacy() {
+        document.getElementById('opt-out-sale').checked = profile.doNotSellOrShare === true;
+        document.getElementById('limit-sensitive').checked = profile.limitSensitiveUse === true;
+        const gpc = document.getElementById('gpc-note');
+        if (navigator.globalPrivacyControl === true) {
+            gpc.style.display = 'block';
+            gpc.textContent = 'Your browser is sending a Global Privacy Control signal, so we treat it as an opt-out of sale and sharing.';
+        }
+        applyLimitToForm();
+    }
+
+    async function savePrivacy() {
+        try {
+            profile = await api('PUT', '/api/me/privacy', {
+                doNotSellOrShare: document.getElementById('opt-out-sale').checked,
+                limitSensitiveUse: document.getElementById('limit-sensitive').checked
+            });
+            renderPrivacy();
+            showNotice('Your privacy choices were saved.', false);
+        } catch (err) {
+            handleError(err);
+            if (profile) renderPrivacy();
+        }
     }
 
     function showPanel(name) {
-        ['profile', 'prescriptions', 'appointments'].forEach(p => {
+        ['profile', 'prescriptions', 'appointments', 'privacy'].forEach(p => {
             document.getElementById('panel-' + p).style.display = p === name ? 'block' : 'none';
             document.getElementById('tab-' + p).classList.toggle('active', p === name);
         });
         clearNotice();
         if (name === 'prescriptions') loadPrescriptions();
         if (name === 'appointments') loadAppointments();
+        if (name === 'privacy') renderPrivacy();
     }
 
     async function loadPrescriptions() {
@@ -494,6 +676,19 @@
     document.getElementById('tab-profile').addEventListener('click', function() { showPanel('profile'); });
     document.getElementById('tab-prescriptions').addEventListener('click', function() { showPanel('prescriptions'); });
     document.getElementById('tab-appointments').addEventListener('click', function() { showPanel('appointments'); });
+    document.getElementById('tab-privacy').addEventListener('click', function() { showPanel('privacy'); });
+    document.getElementById('opt-out-sale').addEventListener('change', savePrivacy);
+    document.getElementById('limit-sensitive').addEventListener('change', savePrivacy);
+    document.getElementById('privacy-choices-link').addEventListener('click', function() {
+        clearNotice();
+        if (profile) {
+            showScreen(dashboardScreen);
+            showPanel('privacy');
+        } else {
+            showScreen(loginScreen);
+            showNotice('Log in to view and change your privacy choices.', false);
+        }
+    });
 
     appData.signupFields.forEach(field => {
         const container = document.createElement('div');
