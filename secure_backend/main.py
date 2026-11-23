@@ -5,7 +5,7 @@ import time
 from contextlib import asynccontextmanager
 from datetime import date, datetime, timezone
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -16,7 +16,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 import config
 from database import Base, async_session, engine, get_session
 from models import Appointment, Doctor, Prescription, User
-from schemas import AppointmentCreate, LoginRequest, SignupRequest, UpdateProfile
+from schemas import AppointmentCreate, LoginRequest, PrivacyChoices, SignupRequest, UpdateProfile
 from security import (create_token, decode_token, decrypt, email_index, encrypt, hash_password, is_common_password, verify_password)
 
 
@@ -94,6 +94,8 @@ def profile(user):
         "firstName": decrypt(user.first_name_enc),
         "lastName": decrypt(user.last_name_enc),
         "subscribetoNewsletter": user.newsletter_opt_in,
+        "doNotSellOrShare": user.do_not_sell_or_share,
+        "limitSensitiveUse": user.limit_sensitive_use,
     }
 
 
@@ -132,7 +134,7 @@ locked_until = {} # time the lock ends
 
 
 @app.post("/api/login")
-async def login(data: LoginRequest, db: AsyncSession = Depends(get_session)):
+async def login(data: LoginRequest, request: Request, db: AsyncSession = Depends(get_session)):
     key = email_index(data.email)
     if locked_until.get(key, 0) > time.time():
         raise HTTPException(429, "Too many failed attempts. Try again in a few minutes.")
@@ -148,6 +150,12 @@ async def login(data: LoginRequest, db: AsyncSession = Depends(get_session)):
         raise HTTPException(401, "Invalid email or password.")
 
     failed_logins.pop(key, None)
+
+    # global privacy control Sec-GPC == 1 means "do not sell my data"
+    if request.headers.get("sec-gpc") == "1" and not user.do_not_sell_or_share:
+        user.do_not_sell_or_share = True
+        await db.commit()
+
     token, _, _ = create_token(user.id, "patient")
     return {"token": token}
 
@@ -178,6 +186,16 @@ async def update_me(data: UpdateProfile, user: User = Depends(get_current_user),
         user.last_name_enc = encrypt(data.lastName)
     if data.subscribetoNewsletter is not None:
         user.newsletter_opt_in = data.subscribetoNewsletter
+    await db.commit()
+    return profile(user)
+
+
+@app.put("/api/me/privacy")
+async def update_privacy(data: PrivacyChoices, user: User = Depends(get_current_user),
+                         db: AsyncSession = Depends(get_session)):
+    # California privacy choices
+    user.do_not_sell_or_share = data.doNotSellOrShare
+    user.limit_sensitive_use = data.limitSensitiveUse
     await db.commit()
     return profile(user)
 
@@ -230,7 +248,9 @@ async def doctor_slots(doctor_id: int, date: date, user: User = Depends(get_curr
 @app.get("/api/appointments")
 async def my_appointments(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_session)):
     # return only the logged in user's appointments
-    appointments = await db.scalars(select(Appointment).where(Appointment.patient_id == user.id))
+    appointments = await db.scalars(
+        select(Appointment).where(Appointment.patient_id == user.id).order_by(Appointment.date, Appointment.time)
+    )
 
     results = []
     for a in appointments:
@@ -253,8 +273,13 @@ async def book_appointment(data: AppointmentCreate, user: User = Depends(get_cur
     if data.time not in await free_slots(db, data.doctorId, data.date):
         raise HTTPException(409, "That time slot is not available.")
 
+    # don't save the reason if it's empty or the user turned on "limit sensitive info"
+    reason = data.reason
+    if not reason or user.limit_sensitive_use:
+        reason = None
+
     appt = Appointment(patient_id=user.id, doctor_id=data.doctorId, date=data.date, time=data.time,
-                       reason_enc=encrypt(data.reason))
+                       reason_enc=encrypt(reason))
     db.add(appt)
     await db.commit()
     return {"id": appt.id}

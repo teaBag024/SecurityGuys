@@ -86,6 +86,7 @@ POST /api/login - anyone - returns a session token that expires after 30 minutes
 POST /api/logout - logged in - logs out (the web page deletes its token)
 GET /api/me - logged in - view your profile
 PUT /api/me - logged in - correct your email, name, or newsletter choice
+PUT /api/me/privacy - logged in - turn "Do Not Sell or Share" and "Limit Sensitive Info" on or off
 DELETE /api/me - logged in - permanently delete your account and all your data
 GET /api/doctors - logged in - list doctors
 GET /api/doctors/{id}/slots?date= - logged in - free time slots for a doctor on a date
@@ -143,4 +144,4 @@ You can also create a new account with POST `/api/signup` from http://127.0.0.1:
 - The login lockout is stored in memory so it resets when the server restarts.
 - Encryption and signing keys are stored in `secure_backend/.secrets.json` on the same machine as the database, a real deployment would use a key management service.
 - There are no doctor or admin accounts, prescriptions can only be created by `seed.py`, not through the API.
-- The web page at http://127.0.0.1:8001 is a frontend demo with its own fake data and does not use the API for demo purposes, use http://127.0.0.1:8001/docs to test the secure backend.
+- The web page only uses the real backend when opened at http://127.0.0.1:8001. If `frontend/newWebpage.html` is opened directly as a file it runs in frontend demo mode.

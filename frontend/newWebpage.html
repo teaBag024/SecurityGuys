@@ -325,7 +325,22 @@
         return demoDb.appointments.filter(a => a.doctorId === doctorId && a.date === date).map(a => a.time);
     }
 
+    // served by the secure backend in http://127.0.0.1:8001, use the real API
+    // this file can be opened directly in file:// which will use the demo data above
+    const USE_REAL_BACKEND = location.protocol.startsWith('http');
+
+    async function realApi(method, url, body) {
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = 'Bearer ' + token;
+        const res = await fetch(url, { method: method, headers: headers, body: body ? JSON.stringify(body) : undefined });
+        let data = {};
+        try { data = await res.json(); } catch (e) {}
+        if (!res.ok) throw fail(res.status, data.error || 'Something went wrong.');
+        return data;
+    }
+
     async function api(method, url, body) {
+        if (USE_REAL_BACKEND) return realApi(method, url, body);
         body = body || {};
         const path = url.split('?')[0];
         const query = new URLSearchParams(url.split('?')[1] || '');

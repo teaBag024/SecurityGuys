@@ -43,6 +43,11 @@ class UpdateProfile(Strict):
     subscribetoNewsletter: bool | None = None
 
 
+class PrivacyChoices(Strict):
+    doNotSellOrShare: bool
+    limitSensitiveUse: bool
+
+
 class AppointmentCreate(Strict):
     doctorId: int
     date: date
