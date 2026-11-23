@@ -58,11 +58,11 @@ uvicorn main:app --reload
 
 ### Insecure endpoints
 (Method - Description)
-GET /health - health check
-POST /signup - create user with everything stored in plaintext and printed to console
-POST/GET/PATCH/DELETE /users, /users/{id} - user CRUD with no auth
-POST/GET/PATCH/DELETE /appointments, /appointments/{id} - appointments CRUD with no auth
-POST/GET/PATCH/DELETE /prescriptions, /prescriptions/{id} - prescriptions CRUD with no auth
+- GET /health - health check
+- POST /signup - create user with everything stored in plaintext and printed to console
+- POST/GET/PATCH/DELETE /users, /users/{id} - user CRUD with no auth
+- POST/GET/PATCH/DELETE /appointments, /appointments/{id} - appointments CRUD with no auth
+- POST/GET/PATCH/DELETE /prescriptions, /prescriptions/{id} - prescriptions CRUD with no auth
 
 ## Running the Secure Version
 In a second terminal with venv activated:
@@ -80,35 +80,35 @@ python seed.py # create the demo accounts below (run once)
 
 ### Secure endpoints
 (Method - Who is allowed to access - Description)
-GET / - anyone - web page
-POST /api/signup - anyone - create account with email, first/last name, password, terms consent, optional newsletter
-POST /api/login - anyone - returns a session token that expires after 30 minutes
-POST /api/logout - logged in - logs out (the web page deletes its token)
-GET /api/me - logged in - view your profile
-PUT /api/me - logged in - correct your email, name, or newsletter choice
-PUT /api/me/privacy - logged in - turn "Do Not Sell or Share" and "Limit Sensitive Info" on or off
-DELETE /api/me - logged in - permanently delete your account and all your data
-GET /api/doctors - logged in - list doctors
-GET /api/doctors/{id}/slots?date= - logged in - free time slots for a doctor on a date
-GET /api/appointments - logged in - list your own appointments
-POST /api/appointments - logged in - book an appointment
-DELETE /api/appointments/{id} - logged in - cancel your own appointment (someone else's appointments returns 404)
-GET /api/prescriptions - logged in - list your own prescriptions
+- GET / - anyone - web page
+- POST /api/signup - anyone - create account with email, first/last name, password, terms consent, optional newsletter
+- POST /api/login - anyone - returns a session token that expires after 30 minutes
+- POST /api/logout - logged in - logs out (the web page deletes its token)
+- GET /api/me - logged in - view your profile
+- PUT /api/me - logged in - correct your email, name, or newsletter choice
+- PUT /api/me/privacy - logged in - turn "Do Not Sell or Share" and "Limit Sensitive Info" on or off
+- DELETE /api/me - logged in - permanently delete your account and all your data
+- GET /api/doctors - logged in - list doctors
+- GET /api/doctors/{id}/slots?date= - logged in - free time slots for a doctor on a date
+- GET /api/appointments - logged in - list your own appointments
+- POST /api/appointments - logged in - book an appointment
+- DELETE /api/appointments/{id} - logged in - cancel your own appointment (someone else's appointments returns 404)
+- GET /api/prescriptions - logged in - list your own prescriptions
 
 ### Security controls in the secure version
 (Control - Where)
-passwords hashed with Argon2id, common passwords rejected - `security.py`, `main.py`
-names, email, appointment reasons, and prescriptions encrypted with fernet - `security.py`, `models.py`
-email looked up with HMAC index and not plaintext - `security.py`
-signed JWT login tokens which expire after 30 minutes - `security.py`, `main.py`
-every protected route checks the token and user id comes from the token - `main.py` (`get_current_user`)
-users can only see and change their own data - `main.py`
-account locked for 15 minutes after 5 wrong passwords - `main.py` (`login`)
-same error for wrong password and unknown email - `main.py` (`login`)
-unknown fields such as `ssn` or `role` rejected with 422 - `schemas.py`
-terms must be accepted, newsletter off by default, time of acceptance saved - `schemas.py`, `models.py`
-deleting an account deletes the user's appointments and prescriptions (ON DELETE CASCADE) - `models.py`, `database.py`
-nothing personal printed to the server console, errors return no stack traces - `main.py`
+- passwords hashed with Argon2id, common passwords rejected - `security.py`, `main.py`
+- names, email, appointment reasons, and prescriptions encrypted with fernet - `security.py`, `models.py`
+- email looked up with HMAC index and not plaintext - `security.py`
+- signed JWT login tokens which expire after 30 minutes - `security.py`, `main.py`
+- every protected route checks the token and user id comes from the token - `main.py` (`get_current_user`)
+- users can only see and change their own data - `main.py`
+- account locked for 15 minutes after 5 wrong passwords - `main.py` (`login`)
+- same error for wrong password and unknown email - `main.py` (`login`)
+- unknown fields such as `ssn` or `role` rejected with 422 - `schemas.py`
+- terms must be accepted, newsletter off by default, time of acceptance saved - `schemas.py`, `models.py`
+- deleting an account deletes the user's appointments and prescriptions (ON DELETE CASCADE) - `models.py`, `database.py`
+- nothing personal printed to the server console, errors return no stack traces - `main.py`
 
 ## Login Credentials for Testing
 ### Insecure version
@@ -132,9 +132,9 @@ curl -X POST http://127.0.0.1:8000/signup \
 
 ### Secure version: example credentials are created by `python seed.py` (you need to start the server once first so the tables exist)
 
-user: patient@example.com
-password: DemoPatient#2026
-This creates demo patient John Doe with one appointment and one prescription
+- user: patient@example.com
+- password: DemoPatient#2026
+- This creates demo patient John Doe with one appointment and one prescription
 
 You can also create a new account with POST `/api/signup` from http://127.0.0.1:8001/docs. To use the protected endpoints in `/docs`, log in with POST `/api/login`, copy the `token`, click **Authorize**, and paste it in.
 
